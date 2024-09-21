@@ -9,7 +9,9 @@
 #include <sstream>
 #include <string>
 
-static void run(std::string source);
+#include "Scanner.hpp"
+
+static void run(std::string&& source);
 static void runFile(std::string path);
 static void runPrompt();
 
@@ -23,18 +25,13 @@ int main(int argc, char** argv)
         std::cout << "Usage: <exec-filename> [<src-filename>]\n";
 }
 
-static void run(std::string source)
+static void run(std::string&& source)
 {
-    std::istringstream iss(source);
-    std::string token;
+    Scanner scanner(std::move(source));
+    const auto& tokens = scanner.scanTokens();
 
-    while (iss >> token)
-        if (std::ranges::all_of(token, [](auto c) {
-            return std::isdigit(c);
-        }))
-            std::cout << std::format("Number <{}>\n", token);
-        else
-            std::cout << std::format("Something <{}>\n", token);
+    for (const auto& token : tokens)
+        std::cout << "    | " << token << "\n";
 }
 
 static void runFile(std::string path)
@@ -55,6 +52,6 @@ static void runPrompt()
         std::string line;
         std::getline(std::cin, line);
         if (line == "quit") break;
-        run(line);
+        run(std::move(line));
     }
 }
