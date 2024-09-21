@@ -1,3 +1,5 @@
+#include "Tephra.hpp"
+
 #include <algorithm>
 #include <cctype>
 #include <cstddef>
@@ -11,21 +13,19 @@
 
 #include "Scanner.hpp"
 
-static void run(std::string&& source);
-static void runFile(std::string path);
-static void runPrompt();
-
 int main(int argc, char** argv)
 {
     if (argc == 1)
-        runPrompt();
+        tephra::runPrompt();
     else if (argc == 2)
-        runFile(argv[1]);
+        tephra::runFile(argv[1]);
     else
         std::cout << "Usage: <exec-filename> [<src-filename>]\n";
 }
 
-static void run(std::string&& source)
+namespace tephra
+{
+void run(std::string&& source)
 {
     Scanner scanner(std::move(source));
     const auto& tokens = scanner.scanTokens();
@@ -34,7 +34,7 @@ static void run(std::string&& source)
         std::cout << "    | " << token << "\n";
 }
 
-static void runFile(std::string path)
+void runFile(const std::string& path)
 {
     std::filesystem::path filePath(path);
     std::size_t fileSize = std::filesystem::file_size(filePath);
@@ -44,7 +44,7 @@ static void runFile(std::string path)
     run(std::string{istream_iter{file}, istream_iter{}});
 }
 
-static void runPrompt()
+void runPrompt()
 {
     std::cout << "========Tephra Prompt========\n";
     for (;;) {
@@ -54,4 +54,5 @@ static void runPrompt()
         if (line == "quit") break;
         run(std::move(line));
     }
+}
 }
