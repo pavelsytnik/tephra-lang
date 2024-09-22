@@ -9,7 +9,6 @@
 #include <iostream>
 #include <iterator>
 #include <sstream>
-#include <string>
 
 #include "Scanner.hpp"
 
