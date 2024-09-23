@@ -54,4 +54,10 @@ void runPrompt()
         run(std::move(line));
     }
 }
+
+void error(unsigned ln, unsigned ch, std::string&& msg)
+{
+    std::cerr << std::format("    | [{}:{}] Error: {}\n",
+                             ln, ch, msg);
+}
 }
