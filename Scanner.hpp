@@ -35,7 +35,14 @@ private:
     inline char next();
     inline char peek(std::string::difference_type skip = 0) const;
     inline void addToken(TokenType type);
+    inline void addToken(TokenType type,
+                         std::string::const_iterator begin,
+                         std::string::const_iterator end);
+    inline bool match(char expected);
     void scanToken();
+    void scanIdentifier();
+    void scanNumber();
+    void scanString();
 };
 
 inline bool Scanner::hasNext() const
@@ -68,6 +75,22 @@ inline char Scanner::peek(std::string::difference_type skip) const
 inline void Scanner::addToken(TokenType type)
 {
     _tokens.emplace_back(type, std::string{_lexemeBegin, _currentPos});
+}
+
+inline void Scanner::addToken(TokenType type,
+                              std::string::const_iterator begin,
+                              std::string::const_iterator end)
+{
+    _tokens.emplace_back(type, std::string{begin, end});
+}
+
+inline bool Scanner::match(char expected)
+{
+    if (peek() != expected)
+        return false;
+
+    next();
+    return true;
 }
 }
 
