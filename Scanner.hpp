@@ -1,6 +1,7 @@
 #ifndef SCANNER_HPP
 #define SCANNER_HPP
 
+#include <iterator>
 #include <string>
 #include <utility>
 #include <vector>
@@ -20,6 +21,7 @@ private:
     std::string::const_iterator _lexemeBegin = _currentPos;
 
     unsigned _line = 1;
+    unsigned _char = 0;
 
 public:
     Scanner(std::string&& source) :
@@ -30,7 +32,8 @@ public:
 
 private:
     inline bool hasNext() const;
-    inline char advance();
+    inline char next();
+    inline char peek(std::string::difference_type skip = 0) const;
     inline void addToken(TokenType type);
     void scanToken();
 };
@@ -40,9 +43,26 @@ inline bool Scanner::hasNext() const
     return _currentPos < _sourceEnd;
 }
 
-inline char Scanner::advance()
+inline char Scanner::next()
 {
-    return *_currentPos++;
+    char c = *_currentPos++;
+
+    if (c == '\n') {
+        _line++;
+        _char = 0;
+    } else {
+        _char++;
+    }
+
+    return c;
+}
+
+inline char Scanner::peek(std::string::difference_type skip) const
+{
+    if (std::distance(_currentPos, _sourceEnd) > skip)
+        return *std::next(_currentPos, skip);
+    else
+        return '\0';
 }
 
 inline void Scanner::addToken(TokenType type)

@@ -15,7 +15,7 @@ const std::vector<Token>& Scanner::scanTokens()
 
 void Scanner::scanToken()
 {
-    switch (char c = advance(); c) {
+    switch (char c = next(); c) {
     using enum TokenType;
 
     // Add token for single-character sequences
