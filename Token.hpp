@@ -12,6 +12,8 @@ struct Token
 {
     const TokenType type;
     const std::string lexeme;
+    unsigned line;
+    unsigned character;
 };
 
 enum class TokenType
@@ -92,7 +94,8 @@ inline std::ostream& operator<<(std::ostream& out, const TokenType& type)
 
 inline std::ostream& operator<<(std::ostream& out, const Token& token)
 {
-    return out << token.type << ": '" << token.lexeme << "'";
+    return out << "[" << token.line << ":" << token.character << "] "
+               << token.type << ": '" << token.lexeme << "'";
 }
 }
 

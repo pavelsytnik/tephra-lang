@@ -44,7 +44,7 @@ private:
     std::string::const_iterator _lexemeBegin = _currentPos;
 
     unsigned _line = 1;
-    unsigned _char = 0;
+    unsigned _char = 1;
 
 public:
     Scanner(std::string&& source) :
@@ -77,7 +77,7 @@ inline char Scanner::next()
 
     if (c == '\n') {
         _line++;
-        _char = 0;
+        _char = 1;
     } else {
         _char++;
     }
@@ -95,12 +95,16 @@ inline char Scanner::peek(std::string::difference_type skip) const
 
 inline void Scanner::addToken(TokenType type)
 {
-    _tokens.emplace_back(type, std::string{_lexemeBegin, _currentPos});
+    addToken(type, {_lexemeBegin, _currentPos});
 }
 
 inline void Scanner::addToken(TokenType type, std::string&& lexeme)
 {
-    _tokens.emplace_back(type, std::move(lexeme));
+    _tokens.emplace_back(type,
+                         std::move(lexeme),
+                         _line,
+                         _char - std::distance(_lexemeBegin, _currentPos)
+    );
 }
 
 inline bool Scanner::match(char expected)

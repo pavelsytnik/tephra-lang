@@ -12,6 +12,7 @@ const std::vector<Token>& Scanner::scanTokens()
         _lexemeBegin = _currentPos;
         scanToken();
     }
+    _lexemeBegin = _sourceEnd;
     addToken(TokenType::EndOfFile, "");
 
     return _tokens;
@@ -90,7 +91,7 @@ void Scanner::scanToken()
         else if (c == '"')
             scanString();
         else
-            tephra::error(_line, _char,
+            tephra::error(_line, _char - 1,
                           "unknown symbol `" + std::string{c} + "`"
             );
         break;
@@ -122,7 +123,7 @@ void Scanner::scanString()
 {
     while (peek() != '"') {
         if (char c = peek();  c == '\r' || c == '\n' || c == '\0') {
-            tephra::error(_line, _char + 1,
+            tephra::error(_line, _char,
                           "closing `\"` in string literal expected"
             );
             return;
