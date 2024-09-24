@@ -12,8 +12,9 @@ const std::vector<Token>& Scanner::scanTokens()
         _lexemeBegin = _currentPos;
         scanToken();
     }
+
     _lexemeBegin = _sourceEnd;
-    addToken(TokenType::EndOfFile, "");
+    addToken(TokenType::EndOfFile);
 
     return _tokens;
 }
@@ -116,7 +117,8 @@ void Scanner::scanNumber()
     while (std::isdigit(peek()))
         next();
 
-    addToken(TokenType::Number);
+    addToken(TokenType::Number,
+             std::stod(std::string{_lexemeBegin, _currentPos}));
 }
 
 void Scanner::scanString()
@@ -134,7 +136,7 @@ void Scanner::scanString()
 
     next(); // Consume closing `"`
     addToken(TokenType::String,
-             {std::next(_lexemeBegin), std::prev(_currentPos)}
+             std::string{std::next(_lexemeBegin), std::prev(_currentPos)}
     );
 }
 }

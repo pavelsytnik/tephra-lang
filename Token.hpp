@@ -3,15 +3,19 @@
 
 #include <iostream>
 #include <string>
+#include <variant>
 
 namespace tephra
 {
 enum class TokenType;
 
+using Literal = std::variant<std::monostate, std::string, double>;
+
 struct Token
 {
     const TokenType type;
     const std::string lexeme;
+    Literal literal;
     unsigned line;
     unsigned character;
 };

@@ -58,7 +58,7 @@ private:
     inline char next();
     inline char peek(std::string::difference_type skip = 0) const;
     inline void addToken(TokenType type);
-    inline void addToken(TokenType type, std::string&& lexeme);
+    inline void addToken(TokenType type, Literal&& literal);
     inline bool match(char expected);
     void scanToken();
     void scanIdentifier();
@@ -95,13 +95,14 @@ inline char Scanner::peek(std::string::difference_type skip) const
 
 inline void Scanner::addToken(TokenType type)
 {
-    addToken(type, {_lexemeBegin, _currentPos});
+    addToken(type, std::monostate{});
 }
 
-inline void Scanner::addToken(TokenType type, std::string&& lexeme)
+inline void Scanner::addToken(TokenType type, Literal&& literal)
 {
     _tokens.emplace_back(type,
-                         std::move(lexeme),
+                         std::string{_lexemeBegin, _currentPos},
+                         std::move(literal),
                          _line,
                          _char - std::distance(_lexemeBegin, _currentPos)
     );
