@@ -30,7 +30,7 @@ void run(std::string&& source)
     const auto& tokens = scanner.scanTokens();
 
     for (const auto& token : tokens)
-        std::cout << "    | " << token << "\n";
+        std::cout << token << "\n";
 }
 
 void runFile(const std::string& path)
@@ -57,7 +57,7 @@ void runPrompt()
 
 void error(unsigned ln, unsigned ch, std::string&& msg)
 {
-    std::cerr << std::format("    | [{}:{}] Error: {}\n",
+    std::cerr << std::format("[{}:{}] Error: {}\n",
                              ln, ch, msg);
 }
 }

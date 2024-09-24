@@ -61,6 +61,7 @@ void Scanner::scanToken()
     case '>':
         addToken(match('=') ? GreaterThanOrEqual : GreaterThan);
         break;
+
     case '=':
         if (match('='))
             addToken(Equal);
@@ -91,9 +92,11 @@ void Scanner::scanToken()
             scanNumber();
         else if (c == '"')
             scanString();
+        else if (c == '!' && match('='))
+            addToken(NotEqual);
         else
             tephra::error(_line, _char - 1,
-                          "unknown symbol `" + std::string{c} + "`"
+                          "unexpected character `" + std::string{c} + "`"
             );
         break;
     }
@@ -116,6 +119,12 @@ void Scanner::scanNumber()
 {
     while (std::isdigit(peek()))
         next();
+
+    if (peek(0) == '.' && std::isdigit(peek(1))) {
+        next(); // Consume `.`
+        while (std::isdigit(peek()))
+            next();
+    }
 
     addToken(TokenType::Number,
              std::stod(std::string{_lexemeBegin, _currentPos}));

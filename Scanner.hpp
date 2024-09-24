@@ -56,7 +56,7 @@ public:
 private:
     inline bool hasNext() const;
     inline char next();
-    inline char peek(std::string::difference_type skip = 0) const;
+    inline char peek(unsigned skip = 0) const;
     inline void addToken(TokenType type);
     inline void addToken(TokenType type, Literal&& literal);
     inline bool match(char expected);
@@ -85,7 +85,7 @@ inline char Scanner::next()
     return c;
 }
 
-inline char Scanner::peek(std::string::difference_type skip) const
+inline char Scanner::peek(unsigned skip) const
 {
     if (std::distance(_currentPos, _sourceEnd) > skip)
         return *std::next(_currentPos, skip);
