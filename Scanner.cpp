@@ -26,6 +26,8 @@ void Scanner::scanToken()
     case ')': addToken(RightParenthesis); break;
     case '[': addToken(LeftBracket     ); break;
     case ']': addToken(RightBracket    ); break;
+    case '{': addToken(LeftBrace       ); break;
+    case '}': addToken(RightBrace      ); break;
     case ':': addToken(Colon           ); break;
     case ';': addToken(Semicolon       ); break;
     case ',': addToken(Comma           ); break;
@@ -58,7 +60,12 @@ void Scanner::scanToken()
         addToken(match('=') ? GreaterThanOrEqual : GreaterThan);
         break;
     case '=':
-        addToken(match('=') ? Equal : Assignment);
+        if (match('='))
+            addToken(Equal);
+        else if (match('>'))
+            addToken(Arrow);
+        else
+            addToken(Assignment);
         break;
 
     case '/':
@@ -95,7 +102,12 @@ void Scanner::scanIdentifier()
     while (std::isalnum(peek()))
         next();
 
-    addToken(TokenType::Identifier);
+    if (std::string lexeme(_lexemeBegin, _currentPos);
+        _keywords.contains(lexeme)
+    )
+        addToken(_keywords[lexeme]);
+    else
+        addToken(TokenType::Identifier);
 }
 
 void Scanner::scanNumber()

@@ -20,6 +20,8 @@ enum class TokenType
     RightParenthesis,
     LeftBracket,
     RightBracket,
+    LeftBrace,
+    RightBrace,
 
     Colon,
     Semicolon,

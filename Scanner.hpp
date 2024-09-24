@@ -3,6 +3,7 @@
 
 #include <iterator>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -15,6 +16,28 @@ class Scanner
 private:
     std::string _source;
     std::vector<Token> _tokens;
+
+    std::unordered_map<std::string, TokenType> _keywords {
+        {"if",       TokenType::If},
+        {"elif",     TokenType::Elif},
+        {"else",     TokenType::Else},
+        {"while",    TokenType::While},
+        {"for",      TokenType::For},
+        {"in",       TokenType::In},
+        {"fun",      TokenType::Fun},
+        {"class",    TokenType::Class},
+        {"var",      TokenType::Var},
+        {"let",      TokenType::Let},
+        {"break",    TokenType::Break},
+        {"continue", TokenType::Continue},
+        {"return",   TokenType::Return},
+        {"and",      TokenType::And},
+        {"or",       TokenType::Or},
+        {"not",      TokenType::Not},
+        {"true",     TokenType::True},
+        {"false",    TokenType::False},
+        {"nil",      TokenType::Nil},
+    };
 
     std::string::const_iterator _currentPos  = _source.cbegin();
     std::string::const_iterator _sourceEnd   = _source.cend();
