@@ -39,8 +39,7 @@ void runFile(const std::string& path)
     std::size_t fileSize = std::filesystem::file_size(filePath);
     std::ifstream file(filePath, std::ios::binary);
 
-    using istream_iter = std::istreambuf_iterator<char>;
-    run(std::string{istream_iter{file}, istream_iter{}});
+    run(std::string{std::istreambuf_iterator{file}, {}});
 }
 
 void runPrompt()

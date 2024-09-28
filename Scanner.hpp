@@ -1,5 +1,5 @@
-#ifndef SCANNER_HPP
-#define SCANNER_HPP
+#ifndef TEPHRA_SCANNER_HPP
+#define TEPHRA_SCANNER_HPP
 
 #include <iterator>
 #include <string>
@@ -11,8 +11,7 @@
 
 namespace tephra
 {
-class Scanner
-{
+class Scanner {
 private:
     std::string _source;
     std::vector<Token> _tokens;
@@ -47,8 +46,9 @@ private:
     unsigned _char = 1;
 
 public:
-    Scanner(std::string&& source) :
-        _source(std::move(source))
+    Scanner(std::string&& source)
+    :
+        _source{std::move(source)}
     {}
 
     const std::vector<Token>& scanTokens();
@@ -57,9 +57,12 @@ private:
     inline bool hasNext() const;
     inline char next();
     inline char peek(unsigned skip = 0) const;
+
     inline void addToken(TokenType type);
     inline void addToken(TokenType type, Literal&& literal);
+
     inline bool match(char expected);
+
     void scanToken();
     void scanIdentifier();
     void scanNumber();
@@ -104,8 +107,7 @@ inline void Scanner::addToken(TokenType type, Literal&& literal)
                          std::string{_lexemeBegin, _currentPos},
                          std::move(literal),
                          _line,
-                         _char - std::distance(_lexemeBegin, _currentPos)
-    );
+                         _char - std::distance(_lexemeBegin, _currentPos));
 }
 
 inline bool Scanner::match(char expected)
@@ -118,4 +120,4 @@ inline bool Scanner::match(char expected)
 }
 }
 
-#endif // !defined(SCANNER_HPP)
+#endif // !defined(TEPHRA_SCANNER_HPP)

@@ -1,5 +1,5 @@
-#ifndef EXPRESSION_HPP
-#define EXPRESSION_HPP
+#ifndef TEPHRA_EXPR_HPP
+#define TEPHRA_EXPR_HPP
 
 #include <memory>
 #include <utility>
@@ -21,10 +21,11 @@ using Expr = std::variant<
     UnaryExpr
 >;
 
-struct BinaryExpr {
-    const std::unique_ptr<Expr> left;
-    const Token op;
-    const std::unique_ptr<Expr> right;
+struct BinaryExpr
+{
+    std::unique_ptr<Expr> left;
+    Token op;
+    std::unique_ptr<Expr> right;
 
     BinaryExpr(std::unique_ptr<Expr> left,
                Token&& op,
@@ -36,8 +37,9 @@ struct BinaryExpr {
     {}
 };
 
-struct GroupingExpr {
-    const std::unique_ptr<Expr> expr;
+struct GroupingExpr
+{
+    std::unique_ptr<Expr> expr;
 
     GroupingExpr(std::unique_ptr<Expr> expr)
     :
@@ -45,8 +47,9 @@ struct GroupingExpr {
     {}
 };
 
-struct LiteralExpr {
-    const Literal literal;
+struct LiteralExpr
+{
+    Literal literal;
 
     LiteralExpr(Literal&& literal)
     :
@@ -54,9 +57,10 @@ struct LiteralExpr {
     {}
 };
 
-struct UnaryExpr {
-    const Token op;
-    const std::unique_ptr<Expr> right;
+struct UnaryExpr
+{
+    Token op;
+    std::unique_ptr<Expr> right;
 
     UnaryExpr(Token&& op,
               std::unique_ptr<Expr> right)
@@ -67,4 +71,4 @@ struct UnaryExpr {
 };
 }
 
-#endif // !defined(EXPRESSION_HPP)
+#endif // !defined(TEPHRA_EXPR_HPP)

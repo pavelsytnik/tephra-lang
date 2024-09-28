@@ -1,5 +1,5 @@
-#ifndef TOKEN_HPP
-#define TOKEN_HPP
+#ifndef TEPHRA_TOKEN_HPP
+#define TEPHRA_TOKEN_HPP
 
 #include <iostream>
 #include <string>
@@ -13,8 +13,8 @@ using Literal = std::variant<std::monostate, std::string, double>;
 
 struct Token
 {
-    const TokenType type;
-    const std::string lexeme;
+    TokenType type;
+    std::string lexeme;
     Literal literal;
     unsigned line;
     unsigned character;
@@ -103,4 +103,4 @@ inline std::ostream& operator<<(std::ostream& out, const Token& token)
 }
 }
 
-#endif // !defined(TOKEN_HPP)
+#endif // !defined(TEPHRA_TOKEN_HPP)

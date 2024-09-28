@@ -37,19 +37,19 @@ void Scanner::scanToken()
     case '~': addToken(BitwiseNot      ); break;
     
     case '-':
-        addToken(match('=') ? MinusAssignment      : Minus);
+        addToken(match('=') ? MinusAssignment : Minus);
         break;
     case '+':
-        addToken(match('=') ? PlusAssignment       : Plus);
+        addToken(match('=') ? PlusAssignment : Plus);
         break;
     case '*':
-        addToken(match('=') ? AsteriskAssignment   : Asterisk);
+        addToken(match('=') ? AsteriskAssignment : Asterisk);
         break;
     case '&':
         addToken(match('=') ? BitwiseAndAssignment : BitwiseAnd);
         break;
     case '|':
-        addToken(match('=') ? BitwiseOrAssignment  : BitwiseOr);
+        addToken(match('=') ? BitwiseOrAssignment : BitwiseOr);
         break;
     case '^':
         addToken(match('=') ? BitwiseXorAssignment : BitwiseXor);
@@ -73,7 +73,7 @@ void Scanner::scanToken()
 
     case '/':
         if (match('/'))
-            while (peek() != '\n')
+            while (hasNext() && peek() != '\n')
                 next();
         else
             addToken(match('=') ? SlashAssignment : Slash);
@@ -96,8 +96,7 @@ void Scanner::scanToken()
             addToken(NotEqual);
         else
             tephra::error(_line, _char - 1,
-                          "unexpected character `" + std::string{c} + "`"
-            );
+                          "unexpected character `" + std::string{c} + "`");
         break;
     }
 }
@@ -135,8 +134,7 @@ void Scanner::scanString()
     while (peek() != '"') {
         if (char c = peek();  c == '\r' || c == '\n' || c == '\0') {
             tephra::error(_line, _char,
-                          "closing `\"` in string literal expected"
-            );
+                          "closing `\"` in string literal expected");
             return;
         }
 
@@ -145,7 +143,6 @@ void Scanner::scanString()
 
     next(); // Consume closing `"`
     addToken(TokenType::String,
-             std::string{std::next(_lexemeBegin), std::prev(_currentPos)}
-    );
+             std::string{std::next(_lexemeBegin), std::prev(_currentPos)});
 }
 }
