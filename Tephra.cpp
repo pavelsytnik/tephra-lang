@@ -8,9 +8,14 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <memory>
 #include <sstream>
 
+#include "Parser.hpp"
 #include "Scanner.hpp"
+
+#include "Expr.hpp"
+#include "ExprPrinter.hpp"
 
 int main(int argc, char** argv)
 {
@@ -27,10 +32,16 @@ namespace tephra
 void run(std::string&& source)
 {
     Scanner scanner(std::move(source));
-    const auto& tokens = scanner.scanTokens();
+    auto& tokens = scanner.scanTokens();
+
+    Parser parser(std::vector<Token>{tokens});
+    auto expr = parser.parse();
 
     for (const auto& token : tokens)
         std::cout << token << "\n";
+
+    if (expr)
+        std::cout << "Parsed: " << std::visit(ExprPrinter{}, *expr) << "\n";
 }
 
 void runFile(const std::string& path)

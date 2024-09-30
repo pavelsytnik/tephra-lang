@@ -6,7 +6,7 @@
 
 namespace tephra
 {
-const std::vector<Token>& Scanner::scanTokens()
+std::vector<Token>& Scanner::scanTokens()
 {
     while (hasNext()) {
         _lexemeBegin = _currentPos;

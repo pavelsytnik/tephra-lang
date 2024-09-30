@@ -51,7 +51,7 @@ public:
         _source{std::move(source)}
     {}
 
-    const std::vector<Token>& scanTokens();
+    std::vector<Token>& scanTokens();
 
 private:
     inline bool hasNext() const;
