@@ -1,15 +1,28 @@
 #ifndef TEPHRA_TOKEN_HPP
 #define TEPHRA_TOKEN_HPP
 
+#include <concepts>
+#include <cstddef>
 #include <iostream>
 #include <string>
+#include <utility>
 #include <variant>
 
 namespace tephra
 {
 enum class TokenType;
 
-using Literal = std::variant<std::monostate, std::string, double>;
+template <typename T>
+concept TokenTypeEntry = std::same_as<T, TokenType>;
+
+using Literal = std::variant
+<
+    std::monostate,
+    std::string,
+    double,
+    bool,
+    std::nullptr_t
+>;
 
 struct Token
 {
@@ -17,7 +30,20 @@ struct Token
     std::string lexeme;
     Literal literal;
     unsigned line;
-    unsigned character;
+    unsigned column;
+
+    Token(TokenType type,
+          std::string&& lexeme,
+          Literal&& literal,
+          unsigned line,
+          unsigned column)
+    :
+        type{type},
+        lexeme{std::move(lexeme)},
+        literal{std::move(literal)},
+        line{line},
+        column{column}
+    {}
 };
 
 enum class TokenType
@@ -86,7 +112,7 @@ enum class TokenType
     False,
     Nil,
 
-    EndOfFile,
+    EndOfFile
 };
 
 std::string stringify(TokenType type);
@@ -98,7 +124,7 @@ inline std::ostream& operator<<(std::ostream& out, const TokenType& type)
 
 inline std::ostream& operator<<(std::ostream& out, const Token& token)
 {
-    return out << "[" << token.line << ":" << token.character << "] "
+    return out << "[" << token.line << ":" << token.column << "] "
                << token.type << ": '" << token.lexeme << "'";
 }
 }
