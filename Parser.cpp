@@ -5,6 +5,17 @@
 
 namespace tephra
 {
+
+namespace
+{
+// TODO: constrain types
+template <typename T, typename... Args>
+std::unique_ptr<Expr> makeExpr(Args&&... args)
+{
+    return std::make_unique<Expr>(T{std::forward<Args>(args)...});
+}
+}
+
 using enum TokenType;
 
 std::unique_ptr<Expr> Parser::parse()
@@ -16,15 +27,9 @@ std::unique_ptr<Expr> Parser::parse()
     }
 }
 
-bool Parser::match(std::initializer_list<TokenType> types)
+bool Parser::eof() const
 {
-    for (auto t : types)
-        if (check(t)) {
-            next();
-            return true;
-        }
-
-    return false;
+    return currentPos_->type == EndOfFile;
 }
 
 bool Parser::check(TokenType type) const
@@ -41,24 +46,19 @@ Token& Parser::consume(TokenType type, const std::string& message)
     throw std::runtime_error{message};
 }
 
-bool Parser::eof() const
-{
-    return _currentPos->type == EndOfFile;
-}
-
 Token& Parser::next()
 {
-    return *_currentPos++;
-}
-
-const Token& Parser::peek() const
-{
-    return *_currentPos;
+    return *currentPos_++;
 }
 
 Token& Parser::prev()
 {
-    return *(_currentPos - 1);
+    return *(currentPos_ - 1);
+}
+
+const Token& Parser::peek() const
+{
+    return *currentPos_;
 }
 
 std::unique_ptr<Expr> Parser::expression()
@@ -70,13 +70,14 @@ std::unique_ptr<Expr> Parser::equality()
 {
     auto expr = comparison();
 
-    while (match({Equal,
-                  NotEqual})) {
+    while (match(Equal, NotEqual)) {
         auto& op = prev();
         auto right = comparison();
-        expr = std::make_unique<Expr>(BinaryExpr{std::move(expr),
-                                                 std::move(op),
-                                                 std::move(right)});
+        expr = makeExpr<BinaryExpr>(
+            std::move(expr),
+            std::move(op),
+            std::move(right)
+        );
     }
 
     return expr;
@@ -86,15 +87,15 @@ std::unique_ptr<Expr> Parser::comparison()
 {
     auto expr = term();
 
-    while (match({LessThan,
-                  GreaterThan,
-                  LessThanOrEqual,
-                  GreaterThanOrEqual})) {
+    while (match(LessThan, LessThanOrEqual,
+                 GreaterThan, GreaterThanOrEqual)) {
         auto& op = prev();
         auto right = term();
-        expr = std::make_unique<Expr>(BinaryExpr{std::move(expr),
-                                                 std::move(op),
-                                                 std::move(right)});
+        expr = makeExpr<BinaryExpr>(
+            std::move(expr),
+            std::move(op),
+            std::move(right)
+        );
     }
 
     return expr;
@@ -104,13 +105,14 @@ std::unique_ptr<Expr> Parser::term()
 {
     auto expr = factor();
 
-    while (match({Minus,
-                  Plus})) {
+    while (match(Minus, Plus)) {
         auto& op = prev();
         auto right = factor();
-        expr = std::make_unique<Expr>(BinaryExpr{std::move(expr),
-                                                 std::move(op),
-                                                 std::move(right)});
+        expr = makeExpr<BinaryExpr>(
+            std::move(expr),
+            std::move(op),
+            std::move(right)
+        );
     }
 
     return expr;
@@ -120,13 +122,14 @@ std::unique_ptr<Expr> Parser::factor()
 {
     auto expr = unary();
 
-    while (match({Asterisk,
-                  Slash})) {
+    while (match(Asterisk, Slash)) {
         auto& op = prev();
         auto right = unary();
-        expr = std::make_unique<Expr>(BinaryExpr{std::move(expr),
-                                                 std::move(op),
-                                                 std::move(right)});
+        expr = makeExpr<BinaryExpr>(
+            std::move(expr),
+            std::move(op),
+            std::move(right)
+        );
     }
 
     return expr;
@@ -134,13 +137,13 @@ std::unique_ptr<Expr> Parser::factor()
 
 std::unique_ptr<Expr> Parser::unary()
 {
-    while (match({Minus,
-                  Plus,
-                  Not})) {
+    while (match(Minus, Plus, Not)) {
         auto& op = prev();
         auto right = unary();
-        return std::make_unique<Expr>(UnaryExpr{std::move(op),
-                                                std::move(right)});
+        return makeExpr<UnaryExpr>(
+            std::move(op),
+            std::move(right)
+        );
     }
 
     return primary();
@@ -148,14 +151,17 @@ std::unique_ptr<Expr> Parser::unary()
 
 std::unique_ptr<Expr> Parser::primary()
 {
-    if (match({Number,
-               String}))
-        return std::make_unique<Expr>(LiteralExpr{std::move(prev().literal)});
+    if (match(Number, String))
+        return makeExpr<LiteralExpr>(
+            std::move(prev().literal)
+        );
 
-    if (match({LeftParenthesis})) {
+    if (match(LeftParenthesis)) {
         auto expr = expression();
         consume(RightParenthesis, "`)` expected");
-        return std::make_unique<Expr>(GroupingExpr{std::move(expr)});
+        return makeExpr<GroupingExpr>(
+            std::move(expr)
+        );
     }
 
     return nullptr; // TODO: implement somehow an empty expression
