@@ -5,17 +5,6 @@
 
 namespace tephra
 {
-
-namespace
-{
-// TODO: constrain types
-template <typename T, typename... Args>
-std::unique_ptr<Expr> makeExpr(Args&&... args)
-{
-    return std::make_unique<Expr>(T{std::forward<Args>(args)...});
-}
-}
-
 using enum TokenType;
 
 std::unique_ptr<Expr> Parser::parse()

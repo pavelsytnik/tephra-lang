@@ -1,6 +1,6 @@
 namespace tephra
 {
-template <TokenTypeEntry... Ts>
+template <std::same_as<TokenType>... Ts>
 bool Parser::match(Ts... types)
 {
     bool occurred = (check(types) || ...);

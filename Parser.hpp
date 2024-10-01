@@ -1,6 +1,7 @@
 #ifndef TEPHRA_PARSER_HPP
 #define TEPHRA_PARSER_HPP
 
+#include <concepts>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -32,7 +33,7 @@ private:
     std::unique_ptr<Expr> unary();
     std::unique_ptr<Expr> primary();
 
-    template <TokenTypeEntry... Ts>
+    template <std::same_as<TokenType>... Ts>
     bool match(Ts... types);
 
     bool eof() const;

@@ -1,7 +1,6 @@
 #ifndef TEPHRA_TOKEN_HPP
 #define TEPHRA_TOKEN_HPP
 
-#include <concepts>
 #include <cstddef>
 #include <iostream>
 #include <string>
@@ -11,9 +10,6 @@
 namespace tephra
 {
 enum class TokenType;
-
-template <typename T>
-concept TokenTypeEntry = std::same_as<T, TokenType>;
 
 using Literal = std::variant
 <

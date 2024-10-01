@@ -6,6 +6,7 @@
 #include <variant>
 
 #include "Token.hpp"
+#include "VariantTraits.hpp"
 
 namespace tephra
 {
@@ -69,6 +70,12 @@ struct UnaryExpr
         right{std::move(right)}
     {}
 };
+
+template <VariantAlternative<Expr> T, typename... Args>
+std::unique_ptr<Expr> makeExpr(Args&&... args)
+{
+    return std::make_unique<Expr>(T{std::forward<Args>(args)...});
+}
 }
 
 #endif // !defined(TEPHRA_EXPR_HPP)
