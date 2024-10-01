@@ -142,7 +142,7 @@ std::unique_ptr<Expr> Parser::primary()
 {
     if (match(Number, String))
         return makeExpr<LiteralExpr>(
-            std::move(prev().literal)
+            std::move(prev())
         );
 
     if (match(LeftParenthesis)) {

@@ -1,6 +1,7 @@
 #ifndef TEPHRA_EXPR_PRINTER_HPP
 #define TEPHRA_EXPR_PRINTER_HPP
 
+#include <format>
 #include <string>
 
 #include "Expr.hpp"
@@ -11,50 +12,45 @@ struct ExprPrinter
 {
     std::string operator()(const BinaryExpr& expr) const
     {
-        std::string result;
-        result += "(";
-        result += expr.op.lexeme;
-        result += " ";
-        result += std::visit(*this, *expr.left);
-        result += " ";
-        result += std::visit(*this, *expr.right);
-        result += ")";
+        auto left  = std::visit(*this, *expr.left);
+        auto op    = expr.op.lexeme;
+        auto right = std::visit(*this, *expr.right);
 
-        return result;
+        return std::format("({1} {0} {2})", left, op, right);
     }
 
     std::string operator()(const GroupingExpr& expr) const
     {
-        std::string result;
-        result += "(group ";
-        result += std::visit(*this, *expr.expr);
-        result += ")";
+        auto content = std::visit(*this, *expr.expr);
 
-        return result;
+        return std::format("(`group` {0})", content);
     }
 
     std::string operator()(const LiteralExpr& expr) const
     {
-        if (const auto& lit = expr.literal;
-            std::holds_alternative<double>(lit))
-            return std::to_string(std::get<double>(lit));
-        else if (std::holds_alternative<std::string>(lit))
-            return std::get<std::string>(lit);
-        else
-            return "nil";
+        return expr.literal.lexeme;
     }
 
     std::string operator()(const UnaryExpr& expr) const
     {
-        std::string result;
-        result += "(";
-        result += expr.op.lexeme;
-        result += " ";
-        result += std::visit(*this, *expr.right);
-        result += ")";
+        auto op    = expr.op.lexeme;
+        auto right = std::visit(*this, *expr.right);
 
-        return result;
+        return std::format("({0} {1})", op, right);
     }
+
+    template <typename T>
+    std::string operator()(const T&) const
+    {
+        static_assert(
+            alwaysFalse_<T>,
+            "tephra::ExprPrinter is not exhaustive"
+        );
+    }
+
+private:
+    template <typename>
+    static constexpr bool alwaysFalse_ = false;
 };
 }
 

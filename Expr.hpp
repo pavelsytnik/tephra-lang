@@ -50,9 +50,9 @@ struct GroupingExpr
 
 struct LiteralExpr
 {
-    Literal literal;
+    Token literal;
 
-    LiteralExpr(Literal&& literal)
+    LiteralExpr(Token&& literal)
     :
         literal{std::move(literal)}
     {}
