@@ -9,14 +9,14 @@ namespace tephra
 std::vector<Token>& Scanner::scanTokens()
 {
     while (hasNext()) {
-        _lexemeBegin = _currentPos;
+        lexemeBegin_ = currentPos_;
         scanToken();
     }
 
-    _lexemeBegin = _sourceEnd;
-    addToken(TokenType::EndOfFile);
+    lexemeBegin_ = sourceEnd_;
+    makeToken(TokenType::EndOfFile);
 
-    return _tokens;
+    return tokens_;
 }
 
 void Scanner::scanToken()
@@ -24,51 +24,51 @@ void Scanner::scanToken()
     switch (char c = next(); c) {
     using enum TokenType;
 
-    case '(': addToken(LeftParenthesis ); break;
-    case ')': addToken(RightParenthesis); break;
-    case '[': addToken(LeftBracket     ); break;
-    case ']': addToken(RightBracket    ); break;
-    case '{': addToken(LeftBrace       ); break;
-    case '}': addToken(RightBrace      ); break;
-    case ':': addToken(Colon           ); break;
-    case ';': addToken(Semicolon       ); break;
-    case ',': addToken(Comma           ); break;
-    case '.': addToken(Dot             ); break;
-    case '~': addToken(BitwiseNot      ); break;
+    case '(': makeToken(LeftParenthesis ); break;
+    case ')': makeToken(RightParenthesis); break;
+    case '[': makeToken(LeftBracket     ); break;
+    case ']': makeToken(RightBracket    ); break;
+    case '{': makeToken(LeftBrace       ); break;
+    case '}': makeToken(RightBrace      ); break;
+    case ':': makeToken(Colon           ); break;
+    case ';': makeToken(Semicolon       ); break;
+    case ',': makeToken(Comma           ); break;
+    case '.': makeToken(Dot             ); break;
+    case '~': makeToken(BitwiseNot      ); break;
     
     case '-':
-        addToken(match('=') ? MinusAssignment : Minus);
+        makeToken(match('=') ? MinusAssignment : Minus);
         break;
     case '+':
-        addToken(match('=') ? PlusAssignment : Plus);
+        makeToken(match('=') ? PlusAssignment : Plus);
         break;
     case '*':
-        addToken(match('=') ? AsteriskAssignment : Asterisk);
+        makeToken(match('=') ? AsteriskAssignment : Asterisk);
         break;
     case '&':
-        addToken(match('=') ? BitwiseAndAssignment : BitwiseAnd);
+        makeToken(match('=') ? BitwiseAndAssignment : BitwiseAnd);
         break;
     case '|':
-        addToken(match('=') ? BitwiseOrAssignment : BitwiseOr);
+        makeToken(match('=') ? BitwiseOrAssignment : BitwiseOr);
         break;
     case '^':
-        addToken(match('=') ? BitwiseXorAssignment : BitwiseXor);
+        makeToken(match('=') ? BitwiseXorAssignment : BitwiseXor);
         break;
 
     case '<':
-        addToken(match('=') ? LessThanOrEqual : LessThan);
+        makeToken(match('=') ? LessThanOrEqual : LessThan);
         break;
     case '>':
-        addToken(match('=') ? GreaterThanOrEqual : GreaterThan);
+        makeToken(match('=') ? GreaterThanOrEqual : GreaterThan);
         break;
 
     case '=':
         if (match('='))
-            addToken(Equal);
+            makeToken(Equal);
         else if (match('>'))
-            addToken(Arrow);
+            makeToken(Arrow);
         else
-            addToken(Assignment);
+            makeToken(Assignment);
         break;
 
     case '/':
@@ -76,7 +76,7 @@ void Scanner::scanToken()
             while (hasNext() && peek() != '\n')
                 next();
         else
-            addToken(match('=') ? SlashAssignment : Slash);
+            makeToken(match('=') ? SlashAssignment : Slash);
         break;
 
     case ' ':
@@ -93,9 +93,9 @@ void Scanner::scanToken()
         else if (c == '"')
             scanString();
         else if (c == '!' && match('='))
-            addToken(NotEqual);
+            makeToken(NotEqual);
         else
-            tephra::error(_line, _char - 1,
+            tephra::error(line_, char_ - 1,
                           "unexpected character `" + std::string{c} + "`");
         break;
     }
@@ -106,12 +106,12 @@ void Scanner::scanIdentifier()
     while (std::isalnum(peek()))
         next();
 
-    if (std::string lexeme(_lexemeBegin, _currentPos);
-        _keywords.contains(lexeme)
+    if (std::string lexeme(lexemeBegin_, currentPos_);
+        keywords_.contains(lexeme)
     )
-        addToken(_keywords[lexeme]);
+        makeToken(keywords_[lexeme]);
     else
-        addToken(TokenType::Identifier);
+        makeToken(TokenType::Identifier);
 }
 
 void Scanner::scanNumber()
@@ -125,15 +125,14 @@ void Scanner::scanNumber()
             next();
     }
 
-    addToken(TokenType::Number,
-             std::stod(std::string{_lexemeBegin, _currentPos}));
+    makeNumber();
 }
 
 void Scanner::scanString()
 {
     while (peek() != '"') {
         if (char c = peek();  c == '\r' || c == '\n' || c == '\0') {
-            tephra::error(_line, _char,
+            tephra::error(line_, char_,
                           "closing `\"` in string literal expected");
             return;
         }
@@ -142,7 +141,74 @@ void Scanner::scanString()
     }
 
     next(); // Consume closing `"`
-    addToken(TokenType::String,
-             std::string{std::next(_lexemeBegin), std::prev(_currentPos)});
+    makeString();
+}
+
+bool Scanner::hasNext() const
+{
+    return currentPos_ < sourceEnd_;
+}
+
+char Scanner::next()
+{
+    char c = *currentPos_++;
+
+    if (c == '\n') {
+        line_++;
+        char_ = 1;
+    } else {
+        char_++;
+    }
+
+    return c;
+}
+
+char Scanner::peek(unsigned skip) const
+{
+    if (std::distance(currentPos_, sourceEnd_) > skip)
+        return *std::next(currentPos_, skip);
+    else
+        return '\0';
+}
+
+bool Scanner::match(char expected)
+{
+    if (peek() != expected)
+        return false;
+
+    next();
+    return true;
+}
+
+void Scanner::makeToken(TokenType type, Literal&& literal)
+{
+    tokens_.emplace_back(
+        type,
+        std::string{lexemeBegin_, currentPos_},
+        std::move(literal),
+        line_,
+        char_ - std::distance(lexemeBegin_, currentPos_)
+    );
+}
+
+void Scanner::makeToken(TokenType type)
+{
+    makeToken(type, std::monostate{});
+}
+
+void Scanner::makeNumber()
+{
+    makeToken(
+        TokenType::Number,
+        std::stod(std::string{lexemeBegin_, currentPos_})
+    );
+}
+
+void Scanner::makeString()
+{
+    makeToken(
+        TokenType::String,
+        std::string{std::next(lexemeBegin_), std::prev(currentPos_)}
+    );
 }
 }

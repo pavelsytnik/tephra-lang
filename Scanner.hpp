@@ -13,10 +13,10 @@ namespace tephra
 {
 class Scanner {
 private:
-    std::string _source;
-    std::vector<Token> _tokens;
+    std::string source_;
+    std::vector<Token> tokens_;
 
-    std::unordered_map<std::string, TokenType> _keywords {
+    std::unordered_map<std::string, TokenType> keywords_ {
         {"if",       TokenType::If},
         {"elif",     TokenType::Elif},
         {"else",     TokenType::Else},
@@ -35,89 +35,40 @@ private:
         {"not",      TokenType::Not},
         {"true",     TokenType::True},
         {"false",    TokenType::False},
-        {"nil",      TokenType::Nil},
+        {"nil",      TokenType::Nil}
     };
 
-    std::string::const_iterator _currentPos  = _source.cbegin();
-    std::string::const_iterator _sourceEnd   = _source.cend();
-    std::string::const_iterator _lexemeBegin = _currentPos;
+    std::string::const_iterator currentPos_  = source_.cbegin();
+    std::string::const_iterator sourceEnd_   = source_.cend();
+    std::string::const_iterator lexemeBegin_ = currentPos_;
 
-    unsigned _line = 1;
-    unsigned _char = 1;
+    unsigned line_ = 1;
+    unsigned char_ = 1;
 
 public:
-    Scanner(std::string&& source)
-    :
-        _source{std::move(source)}
+    Scanner(std::string&& source) :
+        source_{std::move(source)}
     {}
 
     std::vector<Token>& scanTokens();
 
 private:
-    inline bool hasNext() const;
-    inline char next();
-    inline char peek(unsigned skip = 0) const;
+    bool hasNext() const;
+    char next();
+    char peek(unsigned skip = 0) const;
 
-    inline void addToken(TokenType type);
-    inline void addToken(TokenType type, Literal&& literal);
+    bool match(char expected);
 
-    inline bool match(char expected);
+    void makeToken(TokenType type, Literal&& literal);
+    void makeToken(TokenType type);
+    void makeNumber();
+    void makeString();
 
     void scanToken();
     void scanIdentifier();
     void scanNumber();
     void scanString();
 };
-
-inline bool Scanner::hasNext() const
-{
-    return _currentPos < _sourceEnd;
-}
-
-inline char Scanner::next()
-{
-    char c = *_currentPos++;
-
-    if (c == '\n') {
-        _line++;
-        _char = 1;
-    } else {
-        _char++;
-    }
-
-    return c;
-}
-
-inline char Scanner::peek(unsigned skip) const
-{
-    if (std::distance(_currentPos, _sourceEnd) > skip)
-        return *std::next(_currentPos, skip);
-    else
-        return '\0';
-}
-
-inline void Scanner::addToken(TokenType type)
-{
-    addToken(type, std::monostate{});
-}
-
-inline void Scanner::addToken(TokenType type, Literal&& literal)
-{
-    _tokens.emplace_back(type,
-                         std::string{_lexemeBegin, _currentPos},
-                         std::move(literal),
-                         _line,
-                         _char - std::distance(_lexemeBegin, _currentPos));
-}
-
-inline bool Scanner::match(char expected)
-{
-    if (peek() != expected)
-        return false;
-
-    next();
-    return true;
-}
 }
 
 #endif // !defined(TEPHRA_SCANNER_HPP)
