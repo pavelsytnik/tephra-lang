@@ -65,6 +65,8 @@ private:
     void makeString();
 
     void scanToken();
+    void scanLineComment();
+    void scanBlockComment();
     void scanIdentifier();
     void scanNumber();
     void scanString();

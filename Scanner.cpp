@@ -73,8 +73,9 @@ void Scanner::scanToken()
 
     case '/':
         if (match('/'))
-            while (hasNext() && peek() != '\n')
-                next();
+            scanLineComment();
+        else if (match('*'))
+            scanBlockComment();
         else
             makeToken(match('=') ? SlashAssignment : Slash);
         break;
@@ -99,6 +100,26 @@ void Scanner::scanToken()
                           "unexpected character `" + std::string{c} + "`");
         break;
     }
+}
+
+void Scanner::scanLineComment()
+{
+    while (hasNext() && peek() != '\n')
+        next();
+}
+
+void Scanner::scanBlockComment()
+{
+    int commentDepth = 1;
+
+    while (hasNext() && commentDepth > 0)
+        if (char c = next(); c == '*' && match('/'))
+            commentDepth--;
+        else if (c == '/' && match('*'))
+            commentDepth++;
+
+    if (commentDepth > 0)
+        tephra::error(line_, char_, "undeterminated block comment");
 }
 
 void Scanner::scanIdentifier()
